@@ -1,6 +1,10 @@
 const { describe, test, expect } = require("@jest/globals");
-const { normalizeUrl } = require("../crawl.js");
-const htmlDoc = require("./utils/testhtml.html");
+const { normalizeUrl, getURLsFromHTML } = require("../crawl.js");
+const fs = require("fs");
+const path = require("path");
+const htmlDoc = fs.readFileSync(
+  path.resolve(__dirname, "./utils/testhtml.html"),
+);
 
 describe("noramilzeUrl function", () => {
   test("it normalizes URLs", () => {
@@ -22,6 +26,15 @@ describe("noramilzeUrl function", () => {
 
 describe("getURLsFromHTML function", () => {
   test("it grabs all links from a valid document", () => {
-    expect(getURLsFromHTML(htmlDoc)).toBe(false);
+    expect(getURLsFromHTML(htmlDoc, "http://web.simmons.edu")).toContain(
+      "css-linking#internal",
+      "http://web.simmons.edu/~grovesd/comm244",
+      "http://web.simmons.edu/~grovesd/comm244/week3",
+    );
+  });
+  test("it converts relative URLs to absolute URLs", () => {
+    expect(getURLsFromHTML(htmlDoc, "http://web.simmons.edu")).toContain(
+      "http://web.simmons.edu/~grovesd/comm244/week4",
+    );
   });
 });

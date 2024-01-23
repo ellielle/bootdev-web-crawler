@@ -1,4 +1,5 @@
 const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 // takes a string url, and normalizes it by removing the protocol and trailing slash, if there is one
 function normalizeUrl(url) {
@@ -16,9 +17,19 @@ function normalizeUrl(url) {
 // parses an HTML doc for hyperlinks
 // appends the baseUrl to relative links
 function getURLsFromHTML(htmlBody, baseUrl) {
-  return false;
+  const dom = new JSDOM(htmlBody);
+  const linkList = new Set();
+  dom.window.document.querySelectorAll("a").forEach((link) => {
+    if (link.getAttribute("href").startsWith("/")) {
+      linkList.add(`${baseUrl}${link.getAttribute("href")}`);
+    } else {
+      linkList.add(link.getAttribute("href"));
+    }
+  });
+  return linkList;
 }
 
 module.exports = {
   normalizeUrl,
+  getURLsFromHTML,
 };
