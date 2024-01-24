@@ -29,9 +29,30 @@ async function getURLsFromHTML(htmlBody, baseUrl) {
   return linkList;
 }
 
-async function crawlPage(currentUrl) {}
+async function crawlPage(currentUrl) {
+  try {
+    const res = await fetch(currentUrl);
+    if (res.status >= 400 && res.status < 500) {
+      console.log(`Error: status code: ${res.status}`);
+      return;
+    }
+    if (!res.status.ok) {
+      console.log(`Error: status code: ${res.status}`);
+    }
+    if (!res.headers.get("Content-Type").includes("text/html")) {
+      console.log(`Error: link is not text/html`);
+      return;
+    }
+
+    const data = await res.text();
+    console.log(data);
+  } catch (e) {
+    console.log(`Fetch failed: ${e}`);
+  }
+}
 
 module.exports = {
   normalizeUrl,
   getURLsFromHTML,
+  crawlPage,
 };
