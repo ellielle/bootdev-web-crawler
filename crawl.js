@@ -16,7 +16,7 @@ function normalizeUrl(url) {
 
 // parses an HTML doc for hyperlinks
 // appends the baseUrl to relative links
-function getURLsFromHTML(htmlBody, baseUrl) {
+async function getURLsFromHTML(htmlBody, baseUrl) {
   const dom = new JSDOM(htmlBody);
   const linkList = new Set();
   dom.window.document.querySelectorAll("a").forEach((link) => {
@@ -28,6 +28,8 @@ function getURLsFromHTML(htmlBody, baseUrl) {
   });
   return linkList;
 }
+
+async function crawlPage(currentUrl) {}
 
 module.exports = {
   normalizeUrl,

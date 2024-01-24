@@ -25,8 +25,11 @@ describe("noramilzeUrl function", () => {
 });
 
 describe("getURLsFromHTML function", () => {
-  test("it grabs all links from a valid document", () => {
-    expect(getURLsFromHTML(htmlDoc, "http://web.simmons.edu")).toContain(
+  test("it grabs all links from a valid document", async () => {
+    // FIXME: test html is not the same format expected from a response.text()
+    const req = new Request(htmlDoc);
+    const data = await req.text();
+    expect(getURLsFromHTML(data, "http://web.simmons.edu")).toContain(
       "css-linking#internal",
       "http://web.simmons.edu/~grovesd/comm244",
       "http://web.simmons.edu/~grovesd/comm244/week3",
@@ -36,5 +39,11 @@ describe("getURLsFromHTML function", () => {
     expect(getURLsFromHTML(htmlDoc, "http://web.simmons.edu")).toContain(
       "http://web.simmons.edu/~grovesd/comm244/week4",
     );
+  });
+});
+
+describe("crawlPage function", () => {
+  test("it crawls each link found in each page", () => {
+    expect(false);
   });
 });
