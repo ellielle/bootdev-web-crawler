@@ -2,7 +2,7 @@ const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
 // takes a string url, and normalizes it by removing the protocol and trailing slash, if there is one
-function normalizeUrl(url) {
+function normalizeURL(url) {
   try {
     let normalizedUrl = new URL(url);
     if (normalizedUrl.pathname.endsWith("/")) {
@@ -18,26 +18,34 @@ function normalizeUrl(url) {
 // appends the baseUrl to relative links
 async function getURLsFromHTML(htmlBody, baseUrl) {
   const dom = new JSDOM(htmlBody);
-  const linkList = new Set();
+  const linkList = [];
   dom.window.document.querySelectorAll("a").forEach((link) => {
     if (link.getAttribute("href").startsWith("/")) {
-      linkList.add(`${baseUrl}${link.getAttribute("href")}`);
+      linkList.push(`${baseUrl}${link.getAttribute("href")}`);
     } else {
-      linkList.add(link.getAttribute("href"));
+      linkList.push(link.getAttribute("href"));
     }
   });
   return linkList;
 }
 
-async function crawlPage(currentUrl) {
+async function crawlPage(baseURL, currentURL, pages) {
+  const baseURLconverted = new URL(baseURL);
+  const currentURLconverted = new URL(currentURL);
+
+  if (currentURLconverted.host !== baseURLconverted.host) {
+    return pages;
+  }
+
+  const normalizedCurrentURL = normalizeURL(currentURLconverted);
+
+  // TODO: check each url in pages, recursively, and add each link to pages
+  // incrementing if a link is found more than once
   try {
-    const res = await fetch(currentUrl);
+    const res = await fetch(currentURL);
     if (res.status >= 400 && res.status < 500) {
       console.log(`Error: status code: ${res.status}`);
       return;
-    }
-    if (!res.status.ok) {
-      console.log(`Error: status code: ${res.status}`);
     }
     if (!res.headers.get("Content-Type").includes("text/html")) {
       console.log(`Error: link is not text/html`);
@@ -45,14 +53,17 @@ async function crawlPage(currentUrl) {
     }
 
     const data = await res.text();
-    console.log(data);
+
+    // TODO: Crawl page data for URLs
+    //
+    console.log(pages);
   } catch (e) {
     console.log(`Fetch failed: ${e}`);
   }
 }
 
 module.exports = {
-  normalizeUrl,
+  normalizeURL,
   getURLsFromHTML,
   crawlPage,
 };
