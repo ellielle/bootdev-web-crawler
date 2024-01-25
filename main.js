@@ -11,8 +11,11 @@ async function main() {
     throw new Error("Too many arguments");
   }
 
-  const startURL = process.argv[2];
+  let startURL = process.argv[2];
 
+  if (startURL.endsWith("/")) {
+    startURL = startURL.slice(0, -1);
+  }
   try {
     const results = await crawlPage(startURL, startURL);
     printReport(results);
