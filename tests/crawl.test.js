@@ -1,5 +1,6 @@
 const { describe, test, expect } = require("@jest/globals");
 const { normalizeURL, getURLsFromHTML } = require("../crawl.js");
+const { sortResultsByLargest } = require("../report.js");
 const fs = require("fs");
 const path = require("path");
 const htmlDoc = fs.readFileSync(
@@ -39,8 +40,24 @@ describe("getURLsFromHTML function", () => {
   });
 });
 
-describe("crawlPage function", () => {
-  test("it crawls each link found in each page", () => {
-    expect(false);
+describe("sortResultsByLargest function", () => {
+  test("sorts the crawling results from largest count to smallest", () => {
+    const testData = {
+      "boot.dev": 2,
+      "boot.dev/signup-flow": 5,
+      "boot.dev/settings": 2,
+      "boot.dev/teams": 2,
+      "boot.dev/gifts": 2,
+      "boot.dev/sitemap.xml": 2,
+    };
+    const sortedData = sortResultsByLargest(testData);
+    expect(sortedData).toStrictEqual([
+      { "boot.dev/signup-flow": 5 },
+      { "boot.dev": 2 },
+      { "boot.dev/settings": 2 },
+      { "boot.dev/teams": 2 },
+      { "boot.dev/gifts": 2 },
+      { "boot.dev/sitemap.xml": 2 },
+    ]);
   });
 });
