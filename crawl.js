@@ -15,13 +15,13 @@ function normalizeURL(url) {
 }
 
 // parses an HTML doc for hyperlinks
-// appends the baseUrl to relative links
-async function getURLsFromHTML(htmlBody, baseUrl) {
+// appends the baseURL to relative links
+async function getURLsFromHTML(htmlBody, baseURL) {
   const dom = new JSDOM(htmlBody);
   const linkList = [];
   dom.window.document.querySelectorAll("a").forEach((link) => {
     if (link.getAttribute("href").startsWith("/")) {
-      linkList.push(`${baseUrl}${link.getAttribute("href")}`);
+      linkList.push(`${baseURL}${link.getAttribute("href")}`);
     } else {
       linkList.push(link.getAttribute("href"));
     }
@@ -29,7 +29,7 @@ async function getURLsFromHTML(htmlBody, baseUrl) {
   return linkList;
 }
 
-async function crawlPage(baseURL, currentURL, pages) {
+async function crawlPage(baseURL, currentURL, pages = {}) {
   const baseURLconverted = new URL(baseURL);
   const currentURLconverted = new URL(currentURL);
 
@@ -39,10 +39,19 @@ async function crawlPage(baseURL, currentURL, pages) {
 
   const normalizedCurrentURL = normalizeURL(currentURLconverted);
 
-  // TODO: check each url in pages, recursively, and add each link to pages
-  // incrementing if a link is found more than once
+  if (!pages[normalizedCurrentURL]) {
+    pages[normalizedCurrentURL] = 1;
+  }
+  if (baseURL === currentURL) {
+    pages[normalizedCurrentURL] = 0;
+  } else {
+    pages[normalizedCurrentURL] += 1;
+    return pages;
+  }
+
   try {
     const res = await fetch(currentURL);
+    console.log(`Crawling ${currentURL}...`);
     if (res.status >= 400 && res.status < 500) {
       console.log(`Error: status code: ${res.status}`);
       return;
@@ -53,13 +62,16 @@ async function crawlPage(baseURL, currentURL, pages) {
     }
 
     const data = await res.text();
+    const links = await getURLsFromHTML(data, baseURL);
 
-    // TODO: Crawl page data for URLs
-    //
-    console.log(pages);
+    links.forEach((link) => {
+      crawlPage(baseURL, link, pages);
+    });
   } catch (e) {
     console.log(`Fetch failed: ${e}`);
   }
+
+  return pages;
 }
 
 module.exports = {
