@@ -30,8 +30,22 @@ async function getURLsFromHTML(htmlBody, baseURL) {
 }
 
 async function crawlPage(baseURL, currentURL, pages = {}) {
-  const baseURLconverted = new URL(baseURL);
-  const currentURLconverted = new URL(currentURL);
+  // return pages if the link is just an empty fragment
+  if (currentURL === "#") {
+    return pages;
+  }
+
+  let baseURLconverted;
+  let currentURLconverted;
+
+  // try to convert link to URL, return pages if the link is malformed
+  try {
+    baseURLconverted = new URL(baseURL);
+    currentURLconverted = new URL(currentURL);
+  } catch (e) {
+    console.log(e);
+    return pages;
+  }
 
   if (currentURLconverted.host !== baseURLconverted.host) {
     return pages;
